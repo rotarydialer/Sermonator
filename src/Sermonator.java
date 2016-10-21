@@ -108,6 +108,8 @@ public class Sermonator {
         nextWord = startWords.get(randomNextWordInt);
         newPhrase.add(nextWord);
 
+        // comment
+
         // Loop through the words until we reach the end (?)
         while (nextWord.charAt(nextWord.length()-1) != WORD_DELIMITER ) {
             Vector<String> wordSelector = markovChain.get(nextWord);
