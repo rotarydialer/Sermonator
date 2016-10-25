@@ -32,12 +32,13 @@ public class Sermonator {
 
 		// Get the input from either a file or user entry.
 		//getInputFromConsole();
-		readFromFile("delamare-ghost.txt");
-        readFromFile("delamare-remonstrance.txt");
-        readFromFile("delamare-hope.txt");
-        readFromFile("shelley-flower.txt");
+        readFromFile("cs-lewis__spirits-in-bondage.txt");
+//        readFromFile("delamare-ghost.txt");
+//        readFromFile("delamare-remonstrance.txt");
+//        readFromFile("delamare-hope.txt");
+//        readFromFile("shelley-flower.txt");
 
-		//displayChain();
+		displayChain();
 
         int nPhrases = rng.nextInt(35);
 
@@ -125,7 +126,7 @@ public class Sermonator {
 //        System.out.println("randomNextWordInt = " + randomNextWordInt);
 //        System.out.println("nextWord = " + nextWord);
 //        System.out.println("nextWord.charAt(nextWord.length()-1) = " + nextWord.charAt(nextWord.length()-1));
-        //System.out.println("nextWord.length-1 = " + nextWord.length-1);
+//        System.out.println("nextWord.length-1 = " + nextWord.length-1);
 
         // Loop through the words until we reach the end (?)
 		while (nextWord.charAt(nextWord.length()-1) != WORD_DELIMITER ) {
@@ -189,15 +190,15 @@ public class Sermonator {
 
 			try {
 				while((line = bufferedReader.readLine()) != null) {
-					
-					if (line.trim() != "" && !line.trim().isEmpty()) {
+
+                    if (line.trim() != "" && !line.trim().isEmpty()) {
 						
 						addWords(stripUnwantedCharacters(line));
 
 						//System.out.println(line);
 					} else {
 						// don't add empty lines
-					}
+                    }
 					
 				}   
 			} catch (Exception e) {
@@ -248,6 +249,8 @@ public class Sermonator {
         String outString = inString;
 
         outString = outString.replace("'", "");
+        outString = outString.replace("  ", "");
+        outString = outString.replace("\n", "");
         //outString = outString.replace(",", "");
 
         return outString;
