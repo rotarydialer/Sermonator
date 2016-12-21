@@ -22,6 +22,8 @@ public class Sermonator {
     // temp: to analyze specific words
     private static String lookingFor = "";
     private static int lookingForCount = 0;
+    private static int phraseCount = 0;
+    private static int phraseWordCount = 0;
 
     public static void main(String args[]) throws IOException {
 		//System.out.println("START ___");
@@ -33,17 +35,21 @@ public class Sermonator {
 		// Get the input from either a file or user entry.
 		//getInputFromConsole();
         readFromFile("cs-lewis__spirits-in-bondage.txt");
-//        readFromFile("delamare-ghost.txt");
-//        readFromFile("delamare-remonstrance.txt");
-//        readFromFile("delamare-hope.txt");
-//        readFromFile("shelley-flower.txt");
+        readFromFile("walter-de-la-mare--the-return.txt");
+        readFromFile("delamare-ghost.txt");
+        readFromFile("delamare-remonstrance.txt");
+        readFromFile("delamare-hope.txt");
+        readFromFile("shelley-flower.txt");
 
-		displayChain();
+		//displayChain();
 
         int nPhrases = rng.nextInt(35);
+        //int nPhrases = 20;
 
         System.out.println(String.format("Generating %1$d phrases from %2$d nodes", nPhrases, markovChain.size()));
         System.out.println();
+
+        //displayChain();
 
         for (int i=0; i<nPhrases; i++) {
             generateSentence();
@@ -68,17 +74,23 @@ public class Sermonator {
 				startWords.add(words[i]);
 
 				Vector<String> suffix = markovChain.get(words[i]);
+
 				if (suffix == null) {
 					suffix = new Vector<String>();
-					suffix.add(words[i+1]);
-					markovChain.put(words[i], suffix);
+                    try {
+
+                        suffix.add(words[i+1]);
+
+                    } catch (ArrayIndexOutOfBoundsException aiOobe) {
+                        //swallow these exceptions; it just means there was a single word/character on a given line and we can just move on.
+                        //System.out.println(String.format("OOB ERROR at iteration %1$d, words[i]=%2$s (length: %3$d)", i, words[i], words.length) );
+                    }
+                    markovChain.put(words[i], suffix);
 				}
 
 			} else if (i == words.length-1) {		// last word
 				Vector<String> endWords = markovChain.get("_end");
 				endWords.add(words[i]);
-
-				//System.out.println(String.format(" words[%1$d] = %2$s", 1, words[i]));
 
 			} else {								// all middle words
 				Vector<String> suffix = markovChain.get(words[i]);
@@ -119,37 +131,65 @@ public class Sermonator {
 		Vector<String> startWords = markovChain.get("_start");
 		int startWordsLen = startWords.size();
         int randomNextWordInt = rng.nextInt(startWordsLen);
+
         nextWord = startWords.get(randomNextWordInt);
         newPhrase.add(nextWord);
 
-//        System.out.println("startWords = " + startWords);
-//        System.out.println("randomNextWordInt = " + randomNextWordInt);
-//        System.out.println("nextWord = " + nextWord);
-//        System.out.println("nextWord.charAt(nextWord.length()-1) = " + nextWord.charAt(nextWord.length()-1));
-//        System.out.println("nextWord.length-1 = " + nextWord.length-1);
-
         // Loop through the words until we reach the end (?)
-		while (nextWord.charAt(nextWord.length()-1) != WORD_DELIMITER ) {
-			Vector<String> wordSelector = markovChain.get(nextWord);
+        int nwLength = nextWord.length()-1;
+        if (nwLength <= 0) {
+            // just add a blank line in these cases; makes it read more like a poem
+            System.out.println();
+        }
 
-            //System.out.println("wordSelector = " + wordSelector);
+        if (!nextWord.equals("")) {
+            phraseWordCount = 1;
 
-            if (wordSelector!=null) {
-                int wordSelectorSize = wordSelector.size();
-                int rNum = rng.nextInt(wordSelectorSize);
+            while (nextWord.charAt(nextWord.length()-1) != WORD_DELIMITER ) {
+                phraseWordCount++;
+                //System.out.println(" ......." + nextWord.length());
+                Vector<String> wordSelector = markovChain.get(nextWord);
 
-                nextWord = wordSelector.get(rNum);
-                newPhrase.add(nextWord);
-            } else {
-                //System.out.println(String.format(" !-> Word selector for \"%1$s\" was null...", nextWord));
-                break;
+                //System.out.println("wordSelector = " + wordSelector);
+
+                int wordSelectorSize=0;
+                int rNum=0;
+
+                if (wordSelector!=null && !wordSelector.isEmpty()) {
+                    wordSelectorSize = wordSelector.size();
+                    rNum = rng.nextInt(wordSelectorSize);
+
+                    try {
+                        rNum = rng.nextInt(wordSelectorSize);
+
+                        nextWord = wordSelector.get(rNum);
+                    } catch (Exception e) {
+                        System.out.println(String.format("WS ERROR: %1$s", e.getStackTrace() ));
+                        System.out.println(String.format("   -> rnum: %1$d", rNum));
+                        System.out.println(String.format("   -> nextWord: %1$s", nextWord));
+                        System.out.println(String.format("   -> wordSelectorSize: %1$s", wordSelectorSize));
+                        break;
+                    }
+                    //newPhrase.add(nextWord);
+                    newPhrase.add( reinsertApostrophes(nextWord) );
+                } else {
+                    //System.out.println(String.format(" !-> Word selector for \"%1$s\" was null...", nextWord));
+                    break;
+                }
             }
-		}
+
+        }
+
+        // hardcode words that cause failures
+        //nextWord = "think?’";
+
 
 //		System.out.println();
 //		System.out.println("New Phrase: __________________________");
 //		System.out.println(newPhrase.toString());
 
+
+        phraseCount++;
         displayPhrase(newPhrase);
 
         System.out.println();
@@ -168,9 +208,12 @@ public class Sermonator {
     }
 
     private static void displayPhrase(Vector<String> incPhrase) {
+        //System.out.print(phraseCount + ". ");
         for (String word : incPhrase) {
-                System.out.print(word + " ");
+                //System.out.print(word + " ");
+                System.out.print( reinsertApostrophes(word) + " ");
         }
+        //System.out.print(String.format(" (%1$d words)", phraseWordCount));
     }
 
 	private static void readFromFile(String fileName) {
@@ -202,7 +245,8 @@ public class Sermonator {
 					
 				}   
 			} catch (Exception e) {
-				System.out.println(e.getMessage());
+				System.out.println(fileName + " ERROR: " + e.getLocalizedMessage() );
+                e.printStackTrace();
 			} finally {
 				// Always close files.
 				bufferedReader.close(); 
@@ -248,10 +292,18 @@ public class Sermonator {
 	private static String stripUnwantedCharacters (String inString) {
         String outString = inString;
 
-        outString = outString.replace("'", "");
+        outString = outString.replace("'", "~");
         outString = outString.replace("  ", "");
         outString = outString.replace("\n", "");
         //outString = outString.replace(",", "");
+
+        return outString;
+    }
+
+    private static String reinsertApostrophes (String inString) {
+        String outString = inString;
+
+        outString = outString.replace("~", "\'");
 
         return outString;
     }
