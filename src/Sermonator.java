@@ -39,13 +39,16 @@ public class Sermonator {
 
 		// Get the input from either a file or user entry.
 		//getInputFromConsole();
-        readFromFile("cs-lewis__spirits-in-bondage.txt");
-        //readFromFile("walter-de-la-mare--the-return.txt");
+        //readFromFile("cs-lewis__spirits-in-bondage.txt");
+        readFromFile("walter-de-la-mare--the-return.txt");
         readFromFile("walter-de-la-mare--the-veil.txt");
+        readFromFile("spencer_stories-from-the-faerie-queen.txt");
         readFromFile("delamare-ghost.txt");
         readFromFile("delamare-remonstrance.txt");
         readFromFile("delamare-hope.txt");
-        //readFromFile("shelley-flower.txt");
+        readFromFile("shelley-flower.txt");
+        //readFromFile("bible-kjv.txt");
+        readFromFile("bible-niv.txt");
 
 		//displayChain();
 
